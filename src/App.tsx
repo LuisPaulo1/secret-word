@@ -1,6 +1,6 @@
 import './App.css';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import StartScreen from './components/StartScreen';
 import Game from './components/Game';
@@ -26,20 +26,21 @@ function App() {
   const [guesses, setGuesses] = useState(guessesQtd);
   const [score, setScore] = useState(0);
 
-  const pickWordAndCategory = () => {
+  const pickWordAndCategory = useCallback(() => {
     const categories = Object.keys(words);
     const category = categories[Math.floor(Math.random() * Object.keys(categories).length)];
     const word = words[category][Math.floor(Math.random() * words[category].length)];
     return [category, word];
-  }
+  }, [words]);
 
-  const handleStartGame = () => {
+  const handleStartGame = useCallback(() => {
+    clearLettersStates();
     const [category, word] = pickWordAndCategory();
     setPickedWord(word);
     setPickedCategory(category);    
     setLetters(word.toLowerCase().split(''));
     setGameStage(stages[1].name);
-  }
+  }, [pickWordAndCategory]);
 
   const handleVerifyLetter = (letter: string) => {
     const normalizedLetter = letter.toLowerCase();
@@ -80,6 +81,14 @@ function App() {
       setGameStage(stages[2].name);
     }
   }, [guesses]);
+
+  useEffect(() => {
+    const uniqueLetters = [...new Set(letters)];
+    if (guessedLetters.length === uniqueLetters.length) {
+      setScore((actualScore) => (actualScore += 100));
+      handleStartGame();
+    }
+  }, [guessedLetters, letters, handleStartGame]);
 
   return (
     <div className="App">
