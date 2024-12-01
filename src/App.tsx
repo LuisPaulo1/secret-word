@@ -1,11 +1,13 @@
 import './App.css';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import StartScreen from './components/StartScreen';
 import Game from './components/Game';
 import GameOver from './components/GameOver';
 import { wordsList } from './data/words';
+
+const guessesQtd = 3;
 
 const stages = [
   { id: 1, name: 'start' },
@@ -21,7 +23,7 @@ function App() {
 
   const [guessedLetters, setGuessedLetters] = useState<string[]>([]);
   const [wrongLetters, setWrongLetters] = useState<string[]>([]);
-  const [guesses, setGuesses] = useState(3);
+  const [guesses, setGuesses] = useState(guessesQtd);
   const [score, setScore] = useState(0);
 
   const pickWordAndCategory = () => {
@@ -60,10 +62,24 @@ function App() {
       setGuesses((actualGuesses) => actualGuesses - 1);
     }
   }
-
+  
   const handleRetry = () => {
+    setScore(0);
+    setGuesses(guessesQtd);
     setGameStage(stages[0].name);
-  }
+  };
+  
+  const clearLettersStates = () => {
+    setGuessedLetters([]);
+    setWrongLetters([]);
+  };
+
+  useEffect(() => {
+    if (guesses === 0) {
+      clearLettersStates();
+      setGameStage(stages[2].name);
+    }
+  }, [guesses]);
 
   return (
     <div className="App">
